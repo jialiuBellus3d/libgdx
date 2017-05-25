@@ -54,7 +54,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 	/** Desktop only: Set this to an absolute path to load the shader files from an alternative location. */
 	final static String hotLoadFolder = null;
 	/** Desktop only: Set this to an absolute path to save the generated shader files. */
-	final static String tempFolder = System.getProperty("java.io.tmp");
+	final static String tempFolder = System.getProperty("user.home") + "/Desktop/tempshaders";
 
 	protected String shaders[] = new String[] {"<default>", "depth", "gouraud", "phong", "normal", "fur", "cubemap", "reflect",
 		"test"};
@@ -62,7 +62,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 	protected String environments[] = new String[] {"<none>", "debug", "environment_01", "environment_02"};
 
 	protected String materials[] = new String[] {"diffuse_green", "badlogic_normal", "brick01", "brick02", "brick03",
-		"chesterfield", "cloth01", "cloth02", "elephant01", "elephant02", "fur01", "grass01", "metal01", "metal02", "mirror01",
+		"chesterfield", "jia", "cloth01", "cloth02", "elephant01", "elephant02", "fur01", "grass01", "metal01", "metal02", "mirror01",
 		"mirror02", "moon01", "plastic01", "stone01", "stone02", "wood01", "wood02"};
 
 	public static class TestShaderProvider extends DefaultShaderProvider {
@@ -86,7 +86,8 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 		@Override
 		public Shader getShader (Renderable renderable) {
 			try {
-				return super.getShader(renderable);
+				Shader temp = super.getShader(renderable);
+				return temp;
 			} catch (Throwable e) {
 				if (tempFolder != null && Gdx.app.getType() == ApplicationType.Desktop)
 					Gdx.files.absolute(tempFolder).child(name + ".log.txt").writeString(e.getMessage(), false);
@@ -109,8 +110,12 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 				Gdx.files.absolute(tempFolder).child(name + ".fragment.glsl").writeString(prefix + config.fragmentShader, false);
 			}
 			BaseShader result = new MultiPassShader(renderable, config);
-			if (tempFolder != null && Gdx.app.getType() == ApplicationType.Desktop)
+			System.out.println("createShader     "+renderable.material.id);
+			System.out.println("createShader      "+renderable.shader);
+			if (tempFolder != null && Gdx.app.getType() == ApplicationType.Desktop){
 				Gdx.files.absolute(tempFolder).child(name + ".log.txt").writeString(result.program.getLog(), false);
+				System.out.println("createShader      "+result.program.getLog());
+			}
 			return result;
 		}
 	}
@@ -136,16 +141,17 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 
 		shaderProvider = new TestShaderProvider();
 		shaderBatch = new ModelBatch(shaderProvider);
-
+		
 		cam.position.set(1, 1, 1);
 		cam.lookAt(0, 0, 0);
 		cam.update();
 		showAxes = true;
 
-		onModelClicked("g3d/shapes/teapot.g3dj");
+		onModelClicked("g3d/shapes/cube_1.0x1.0.g3dj");
 
 		shaderRoot = (hotLoadFolder != null && Gdx.app.getType() == ApplicationType.Desktop) ? Gdx.files.absolute(hotLoadFolder)
 			: Gdx.files.internal("data/g3d/shaders");
+		setShader("phong");
 	}
 
 	@Override
@@ -160,6 +166,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 
 	public void setEnvironment (String name) {
 		if (name == null) return;
+		System.out.println(name);
 		if (cubemap != null) {
 			cubemap.dispose();
 			cubemap = null;
@@ -184,6 +191,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 
 	public void setMaterial (String name) {
 		if (name == null) return;
+		System.out.println(name);
 		if (currentlyLoading != null) {
 			Gdx.app.error("ModelTest", "Wait for the current model/material to be loaded.");
 			return;
@@ -196,12 +204,14 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 	}
 
 	public void setShader (String name) {
+		System.out.println(name);
 		shaderProvider.error = false;
 		if (name.equals("<default>")) {
 			shaderProvider.config.vertexShader = null;
 			shaderProvider.config.fragmentShader = null;
 			shaderProvider.name = "default";
 		} else {
+			System.out.println("setShader   "+name+"     "+shaderRoot);
 			ShaderLoader loader = new ShaderLoader(shaderRoot);
 			shaderProvider.config.vertexShader = loader.load(name + ".glsl:VS");
 			shaderProvider.config.fragmentShader = loader.load(name + ".glsl:FS");
@@ -273,6 +283,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 			if (currentMaterial != null && !currentMaterial.equals(currentlyLoading)) assets.unload(currentMaterial);
 			currentMaterial = currentlyLoading;
 			currentlyLoading = null;
+			System.out.println("instance get");
 			ModelInstance instance = instances.get(0);
 			if (instance != null) {
 				instance.materials.get(0).clear();
@@ -287,6 +298,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 			animationControllers.clear();
 			final ModelInstance instance = new ModelInstance(assets.get(currentModel, Model.class), transform);
 			instances.add(instance);
+			System.out.println("instance add");
 			if (instance.animations.size > 0) animationControllers.put(instance, new AnimationController(instance));
 
 			instance.calculateBoundingBox(bounds);
@@ -309,6 +321,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 			@Override
 			public void clicked (InputEvent event, float x, float y) {
 				if (!shadersWindow.isCollapsed() && getTapCount() == 2) {
+					System.out.println("set shader" + shadersList.getSelected());
 					setShader(shadersList.getSelected());
 					shadersWindow.collapse();
 				}
@@ -322,6 +335,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 			@Override
 			public void clicked (InputEvent event, float x, float y) {
 				if (!materialsWindow.isCollapsed() && getTapCount() == 2) {
+					System.out.println("set material" + materialsList.getSelected());
 					setMaterial(materialsList.getSelected());
 					materialsWindow.collapse();
 				}
@@ -336,6 +350,7 @@ public class ShaderCollectionTest extends BaseG3dHudTest {
 			public void clicked (InputEvent event, float x, float y) {
 				if (!environmentsWindow.isCollapsed() && getTapCount() == 2) {
 					setEnvironment(environmentsList.getSelected());
+					System.out.println("set environment" + environmentsList.getSelected());
 					environmentsWindow.collapse();
 				}
 			}

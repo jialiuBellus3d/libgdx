@@ -45,7 +45,7 @@
 	], 
 	"materials": [
 		{
-			"id": "chesterField_phong", 
+			"id": "jia_phong", 
 			"diffuse": [ 1.000000,  1.000000,  1.000000], 
 			"specular": [ 0.500000,  0.500000,  0.500000]
 		}
@@ -56,7 +56,7 @@
 			"parts": [
 				{
 					"meshpartid": "shape1_part1", 
-					"materialid": "chesterField_phong", 
+					"materialid": "jia_phong", 
 					"uvMapping": [[  0,   1,   2]]
 				}
 			]

@@ -1,0 +1,26 @@
+{
+	"version": [  0,   1], 
+	"id": "", 
+	"meshes": [], 
+	"materials": [
+		{
+			"id": "jia_phong", 
+			"diffuse": [ 0.800000,  0.800000,  0.800000],
+			"specular": [ 0.500000,  0.500000,  0.500000],
+			"textures": [
+				{
+					"id": "jia_diffuse", 
+					"filename": "jia_diffuse.png", 
+					"type": "DIFFUSE"
+				}, 
+				{
+					"id": "jia_normal", 
+					"filename": "jia_normal.png", 
+					"type": "NORMAL"
+				}
+			]
+		}
+	],
+	"nodes": [], 
+	"animations": []
+}
